@@ -17,9 +17,9 @@ These scripts are useful if you have a large several MB bibtex library like me a
 
 # Example usage
 
-For example, we would like to include Einstein's relativity papers [@Einstein1905tragheit;@Einstein1916grundlage] in our bibliography, but not his other papers that are located in the /ref/Einsteins_refs.bib bibtex file.
+For example, we would like to include Einstein's relativity papers [@Einstein1905tragheit;@Einstein1916grundlage] in our bibliography, but not his other papers that are located in the `/refs/Einsteins_refs.bib` bibtex file.
 
-Now run:
+To crop the bibtex file, run:
 
     >>> python crop_bibtex_file.py -s
 
@@ -27,16 +27,28 @@ or manually specify the location of this readme file and the bibtex file using
 
     >>> python crop_bibtex_file.py readme.md refs/Einsteins_refs.bib
 
-To use pandoc to create pdf or docx document including a nice bibliography run:
+To use pandoc to create a pdf document including a nice bibliography run:
 
-    >>> pandoc readme.md -o readme.pdf --bibliography=refs/Einstein_refs_cropped_for_readme.bib --csl nature.csl
+    >>> pandoc readme.md -o readme.pdf --bibliography=refs/Einstein_refs_cropped_for_readme.bib --csl rvmp.csl
 
-Citation style files can be found in many places, for example in Zotero's style repository: www.zotero.org/styles
+The --csl command specifies a citation style. Citation style files can be found in many places, for example in Zotero's style repository: www.zotero.org/styles
 
 You can also automate the entire process by running:
 
     >>> python generate_docs_from_md.py
     
-This will automatically search for markdown files in the current working directory and bibtex files in the directory `refs`, crop all bibtex files and generate pdf, odt and docx output. 
+This will automatically search for markdown files in the current working directory and bibtex files in the directory `refs`, crop all bibtex files and generate pdf, odt and docx output.
+
+See the included readme.pdf, readme.odt or readme.docx files to check how this readme file looks with a bibliography.
+
+
+# License
+
+GPL v3 (http://www.gnu.org/copyleft/gpl.html)
+
+
+
+Elco Luijendijk, june 2014
+
 
 # References
