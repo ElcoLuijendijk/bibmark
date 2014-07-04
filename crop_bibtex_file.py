@@ -88,15 +88,17 @@ if '-s' in sys.argv:
     cwd_files = os.listdir(workdir)
     ref_files = os.listdir(refdir)
 
-    md_files = [fn for fn in cwd_files if '.md' in fn]
-
+    md_files = [fn for fn in cwd_files if '.md' in fn and '.md~' not in fn]
+    
+    md_files_full = [os.path.join(workdir, md_file) for md_file in md_files]
+    
     if os.path.isdir(refdir) is True:
         bib_files = [os.path.join(refdir, fn) for fn in ref_files
                      if '.bib' in fn and 'cropped' not in fn]
     else:
         bib_files = [fn for fn in ref_files if '.bib' in fn]
 
-    print 'found markdown files %s' % ', '.join(md_files)
+    print 'found markdown files %s' % ', '.join(md_files_full)
     print 'found bibtex files %s' % ', '.join(bib_files)
 
 
@@ -117,7 +119,8 @@ else:
 items_to_remove = ['abstract', 'annote']
 
 
-for md_file, bib_file in itertools.product(md_files, bib_files):
+for md_file, md_filename, bib_file in \
+    itertools.product(md_files_full, md_files, bib_files):
 
     print '-' * 20
     print 'reading md file %s' % md_file
@@ -133,7 +136,7 @@ for md_file, bib_file in itertools.product(md_files, bib_files):
     bib_f.close()
 
     print 'extracting references found in %s from %s' % (md_file, bib_file)
-
+    
     bibs = bib.split('@')[1:]
 
     keys = [b[b.find('{')+1:b.find(',')] for b in bibs]
@@ -153,7 +156,7 @@ for md_file, bib_file in itertools.product(md_files, bib_files):
     new_bib = ''.join(cleaned_bib)
 
     # construct output fn
-    md_file_short = md_file.split('.')[-2]
+    md_file_short = (os.path.split(md_file)[-1]).split('.')[-2]
     bib_file_short = '.'.join(bib_file.split('.')[:-1])
     output_fn = '%s_cropped_for_%s.bib' % (bib_file_short, md_file_short)
 

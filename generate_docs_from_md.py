@@ -17,7 +17,11 @@ import sys
 import os
 import subprocess
 
-# fin out if user specified work dir
+# 
+scriptdir = os.path.dirname(os.path.realpath(__file__))
+current_dir = os.getcwd()
+
+# find out if user specified work dir
 if '-d' in sys.argv:
     work_dir = sys.argv[sys.argv.index('-d')+1]
 else:
@@ -32,13 +36,13 @@ print 'and looking for bibtex files in %s' % ref_dir
 
 # crop bibtex file
 subprocess.call(['python',
-                 os.path.join(work_dir, 'crop_bibtex_file.py'),
-                 '-s'])
+                 os.path.join(scriptdir, 'crop_bibtex_file.py'),
+                 '-s', work_dir])
 
 fns = os.listdir(work_dir)
 fns_ref = os.listdir(ref_dir)
 
-markdown_files = [fn for fn in fns if '.md' in fn]
+markdown_files = [fn for fn in fns if ('.md' in fn and '~' not in fn)]
 
 # find bibliography style file (.csl),
 # assume there is only one in work directory
@@ -65,15 +69,24 @@ for markdown_file in markdown_files:
 
         for output_format in output_formats:
 
-            output_file = os.path.join(work_dir,
-                                       '%s.%s' % (md_short, output_format))
+            output_file = os.path.join('%s.%s' % (md_short, output_format))
+
+
+            #md_file_loc = os.path.join(work_dir, markdown_file)
+            #csl_file_loc = os.path.join(work_dir, csl_file)
 
             pdc = ['pandoc', markdown_file, '-o',  output_file,
                    '-V', 'geometry:margin=1in',
                    '--bibliography=%s' % bib_file_with_path,
                    '--csl=%s' % csl_file]
-            print 'calling pandoc:'
+            print '\n\ncalling pandoc:\n'
             print '-> ', ' '.join(pdc)
+
+            # using os.chdir to change to directory where markdown file is
+            # located. Not so elegant, but only way to keep figure references
+            # in markdown file intact
+            os.chdir(work_dir)
             subprocess.call(pdc)
+            os.chdir(current_dir)
 
 print 'done'
