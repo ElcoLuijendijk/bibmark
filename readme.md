@@ -21,11 +21,9 @@ For example, we would like to include Einstein's relativity papers [@Einstein190
 
 To crop the bibtex file, run:
 
-    >>> python crop_bibtex_file.py -s
+    >>> python crop_bibtex_file.py
 
-or manually specify the location of this readme file and the bibtex file using
-
-    >>> python crop_bibtex_file.py readme.md refs/Einsteins_refs.bib
+This will automatically crop the bibtex file located in a folder specified in `default_bibtex_file.txt` located in the bibmark folder. If this file does not exist the script searches for bibtex files in the folder `refs`.
 
 To use pandoc to create a pdf document including a nice bibliography run:
 
@@ -48,7 +46,7 @@ GPL v3 (http://www.gnu.org/copyleft/gpl.html)
 
 
 
-Elco Luijendijk, june 2014
+Elco Luijendijk, 2014
 
 
 # References

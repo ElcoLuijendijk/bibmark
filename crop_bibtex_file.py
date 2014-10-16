@@ -23,6 +23,7 @@ bibtex_cropped_for_md_file_1.bib and bibtex_cropped_for_md_file_2.bib
 
 """
 
+import pdb
 import os
 import sys
 import itertools
@@ -62,57 +63,37 @@ def remove_item(bib_list, item_name):
     return modified_bib
 
 
-if '-s' in sys.argv:
-
-    print '-' * 20
-    print 'searching for input markdown and bibtex files'
-    print 'markdown file assumed to have extension .md and located in ' \
-          'working directory'
-    print 'bibtex file searched in subdirectory /refs'
-    print 'if this directory does not exist the bibtex file is assumed to be '
-    print 'located in the current working directory'
-
-    # find out if user specified working directory:
-    if sys.argv[-1] != '-s':
-        workdir = sys.argv[sys.argv.index('-s')+1]
-    else:
-        # if not use current dir
-        workdir = os.getcwd()
-
-    # find ref folder, which contains bibtex file(s)
-    refdir = os.path.join(workdir, 'refs')
-
-    if os.path.isdir(refdir) is False:
-        refdir = workdir
-
-    cwd_files = os.listdir(workdir)
-    ref_files = os.listdir(refdir)
-
-    md_files = [fn for fn in cwd_files if '.md' in fn and '.md~' not in fn]
-    
-    md_files_full = [os.path.join(workdir, md_file) for md_file in md_files]
-    
-    if os.path.isdir(refdir) is True:
-        bib_files = [os.path.join(refdir, fn) for fn in ref_files
-                     if '.bib' in fn and 'cropped' not in fn]
-    else:
-        bib_files = [fn for fn in ref_files if '.bib' in fn]
-
-    print 'found markdown files %s' % ', '.join(md_files_full)
-    print 'found bibtex files %s' % ', '.join(bib_files)
-
-
-elif len(sys.argv) > 2:
-    # user specified markdown and bibtex file
-    md_fn = [arg for arg in sys.argv if '.md' in arg]
-    bib_fn = [arg for arg in sys.argv if '.bib' in arg]
-
+# find out if user specified work dir
+if len(sys.argv) > 1:
+    work_dir = sys.argv[1]
 else:
-    print 'please specify input & output files, for example:'
-    print '``python parse_bibtext.py markdown_file.md bibtex_library.bib '
-    print 'or use ``python parse_bibtext.py -s`` to automatically search '\
-          'for markdown and bibtex files and parse all combinations'
-    exit()
+    work_dir = os.getcwd()
+
+if len(sys.argv) > 2:
+    ref_dir = sys.argv[2]
+else:
+    ref_dir = os.path.join(work_dir, 'refs')
+    if os.path.exists(ref_dir) is False:
+        ref_dir = work_dir
+
+print 'looking for markdown files in %s' % work_dir
+print 'and looking for bibtex files in %s' % ref_dir
+
+cwd_files = os.listdir(work_dir)
+ref_files = os.listdir(ref_dir)
+
+md_files = [fn for fn in cwd_files if '.md' in fn and '.md~' not in fn]
+
+md_files_full = [os.path.join(work_dir, md_file) for md_file in md_files]
+
+if os.path.isdir(ref_dir) is True:
+    bib_files = [os.path.join(ref_dir, fn) for fn in ref_files
+                 if '.bib' in fn and 'cropped' not in fn]
+else:
+    bib_files = [fn for fn in ref_files if '.bib' in fn]
+
+print 'found markdown files %s' % ', '.join(md_files_full)
+print 'found bibtex files %s' % ', '.join(bib_files)
 
 # items to remove from bibtex entries
 # for some reason pandoc citeproc cannot handle abstract or annote items
@@ -120,7 +101,7 @@ items_to_remove = ['abstract', 'annote']
 
 
 for md_file, md_filename, bib_file in \
-    itertools.product(md_files_full, md_files, bib_files):
+        itertools.product(md_files_full, md_files, bib_files):
 
     print '-' * 20
     print 'reading md file %s' % md_file
@@ -157,13 +138,14 @@ for md_file, md_filename, bib_file in \
 
     # construct output fn
     md_file_short = (os.path.split(md_file)[-1]).split('.')[-2]
-    bib_file_short = '.'.join(bib_file.split('.')[:-1])
+    bib_file_short = os.path.split(bib_file)[-1].split('.')[-2]
     output_fn = '%s_cropped_for_%s.bib' % (bib_file_short, md_file_short)
+    output_fn_full = os.path.join(work_dir, output_fn)
 
     # save new bibtex file
-    print 'saving cropped bib file %s' % output_fn
+    print 'saving cropped bib file %s' % output_fn_full
 
-    fout = open(output_fn, 'w')
+    fout = open(output_fn_full, 'w')
     fout.write(new_bib)
     fout.close()
 
