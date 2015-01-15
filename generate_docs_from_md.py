@@ -38,11 +38,16 @@ if len(sys.argv) > 2:
     print 'user-specified bibtex directory'
     ref_dir = sys.argv[2]
 else:
-    if os.path.exists('default_bibtex_folder.txt'):
-        print 'reading default bibtex file location from ' \
-              '"default_bibtex_folder.txt"'
+    if 'darwin' in sys.platform:
+        default_bibtex_folder = 'default_bibtex_folder_mac.txt'
+    else:
+        default_bibtex_folder = 'default_bibtex_folder.txt'
 
-        fin = open('default_bibtex_folder.txt', 'r')
+    if os.path.exists(default_bibtex_folder):
+        print 'reading default bibtex file location from ' \
+              '%s' % default_bibtex_folder
+
+        fin = open(default_bibtex_folder, 'r')
         ref_dir = fin.readlines()[0].rstrip()
         fin.close()
 
@@ -84,7 +89,7 @@ if '-o' in sys.argv:
     output_formats = sys.argv[sys.argv.index('-o')+1:]
 # default = pdf, docx and odt output
 else:
-    output_formats = ['pdf', 'docx', 'odt']
+    output_formats = ['pdf', 'docx']
 
 for markdown_file in markdown_files:
     

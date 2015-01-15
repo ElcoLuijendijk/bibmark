@@ -130,8 +130,9 @@ for md_file, md_filename, bib_file in \
     # remove abstracts, somehow pandoc cannot handle these
     print 'removing items %s from new bibtex file' \
           % ', '.join(items_to_remove)
+    cleaned_bib = updated_bibs
     for item_to_remove in items_to_remove:
-        cleaned_bib = remove_item(updated_bibs, item_to_remove)
+        cleaned_bib = remove_item(cleaned_bib, item_to_remove)
 
     # convert new bibtex file from list to string
     new_bib = ''.join(cleaned_bib)
