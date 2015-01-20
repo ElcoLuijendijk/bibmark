@@ -6,7 +6,7 @@ generate pdf, docx and odt output
 standard input:
 python generate_docs_from_md.py markdown_dir bibtex_dir
 
-where markdown dir is the lcoation of the directory containing one or more
+where markdown dir is the location of the directory containing one or more
 
 
 To run the script from the present working directory:
@@ -31,8 +31,19 @@ current_dir = os.getcwd()
 # find out if user specified work dir
 if len(sys.argv) > 1:
     work_dir = sys.argv[1]
+elif 'last_directory.txt' in os.listdir(scriptdir):
+    work_dir =\
+        open(os.path.join(scriptdir, 'last_directory.txt'), 'r').read().strip()
+    print 'trying to look for markdown files in last-used directory: %s' \
+          % work_dir
+    print 'press enter to continue or enter an alternative directory path:'
+    a = raw_input()
+    if len(a) > 0:
+        work_dir = a
 else:
-    work_dir = os.getcwd()
+    print 'please enter the full path to the directory where I should ' \
+          'look for markdown files'
+    work_dir = raw_input()
 
 if len(sys.argv) > 2:
     print 'user-specified bibtex directory'
@@ -123,5 +134,10 @@ for markdown_file in markdown_files:
             os.chdir(work_dir)
             subprocess.call(pdc)
             os.chdir(current_dir)
+
+# saving directory path
+fout = open(os.path.join(scriptdir, 'last_directory.txt'))
+fout.write('%s' % work_dir)
+fout.close()
 
 print 'done'
