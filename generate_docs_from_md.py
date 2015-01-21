@@ -136,7 +136,7 @@ for markdown_file in markdown_files:
             os.chdir(current_dir)
 
 # saving directory path
-fout = open(os.path.join(scriptdir, 'last_directory.txt'))
+fout = open(os.path.join(scriptdir, 'last_directory.txt'), 'w')
 fout.write('%s' % work_dir)
 fout.close()
 
