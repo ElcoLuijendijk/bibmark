@@ -54,7 +54,7 @@ def remove_item(bib_list, item_name):
     for bib_item in bib_list:
         if ('%s =' % item_name) in bib_item:
             start_item = bib_item.find(item_name)-2
-            end_item = start_item + bib_item[start_item:].find('}') + 1
+            end_item = start_item + bib_item[start_item:].find('},') + 1
             bib_item_cleaned = bib_item[:start_item] + bib_item[end_item:]
             modified_bib.append(bib_item_cleaned)
         else:
