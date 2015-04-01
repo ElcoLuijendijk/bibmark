@@ -30,7 +30,7 @@ current_dir = os.getcwd()
 
 # find out if user specified work dir
 if len(sys.argv) > 1:
-    work_dir = sys.argv[1]
+    work_dir = sys.argv[-1]
 elif 'last_directory.txt' in os.listdir(scriptdir):
     work_dir =\
         open(os.path.join(scriptdir, 'last_directory.txt'), 'r').read().strip()
@@ -45,9 +45,9 @@ else:
           'look for markdown files'
     work_dir = raw_input()
 
-if len(sys.argv) > 2:
+if '-bibtex' in sys.argv:
     print 'user-specified bibtex directory'
-    ref_dir = sys.argv[2]
+    ref_dir = sys.argv[-2]
 else:
     if 'darwin' in sys.platform:
         default_bibtex_folder = 'default_bibtex_folder_mac.txt'
@@ -83,17 +83,28 @@ subprocess.call(['python',
 
 fns = os.listdir(work_dir)
 fns_ref = os.listdir(work_dir)
+fns_script = os.listdir(scriptdir)
 
 markdown_files = [fn for fn in fns if ('.md' in fn and '~' not in fn)]
 
 # find bibliography style file (.csl),
 # assume there is only one in work directory
-try:
-    csl_file = [fn for fn in fns if '.csl' in fn][0]
-except IndexError:
-    msg = 'could not find a .csl file in the working directory %s' \
-          % work_dir
-    raise IndexError(msg)
+csl_folder = work_dir
+csl_files = [fn for fn in fns if '.csl' in fn]
+
+if len(csl_files) == 0:
+    print 'cannot find a csl file in working dir, ' \
+          'trying to find .csl file in the bibmark directory instead'
+    csl_files = [fn for fn in fns_script if '.csl' in fn]
+    csl_folder = scriptdir
+    if len(csl_files) == 0:
+        msg = 'could not find a .csl file in the working directory %s or ' \
+              'the script directory %s' \
+              % (work_dir, scriptdir)
+        raise IndexError(msg)
+
+csl_files.sort()
+csl_file = csl_files[0]
 
 # user specified output formats
 if '-o' in sys.argv:
@@ -119,12 +130,16 @@ for markdown_file in markdown_files:
             output_file = os.path.join('%s.%s' % (md_short, output_format))
 
             #md_file_loc = os.path.join(work_dir, markdown_file)
-            #csl_file_loc = os.path.join(work_dir, csl_file)
+            csl_fn = os.path.join(csl_folder, csl_file)
+
 
             pdc = ['pandoc', markdown_file, '-o',  output_file,
                    '-V', 'geometry:margin=1in',
                    '--bibliography=%s' % bib_file_with_path,
-                   '--csl=%s' % csl_file]
+                   '--csl=%s' % csl_fn]
+            if '-xe' in sys.argv:
+                pdc.append("--latex-engine=xelatex")
+
             print '\n\ncalling pandoc:\n'
             print '-> ', ' '.join(pdc)
 
