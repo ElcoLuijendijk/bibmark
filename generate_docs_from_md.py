@@ -24,13 +24,43 @@ import sys
 import os
 import subprocess
 
+
+def parse_arguments(args):
+
+    """
+    parse file arguments
+    separates arguments in main arguments starting with - and additional
+    options that follow each main argument
+
+    :param args:
+    :return:
+
+    """
+
+    args_ind = [i for i, s in enumerate(args) if s[0] == '-']
+    arg_names = [args[i] for i in args_ind]
+    arg_opts = [args[a+1:b] for a, b in zip(args_ind[:-1], args_ind[1:])]
+    arg_opts.append(args[args_ind[-1]+1:])
+
+    final_args = [[a, b] for a, b in zip(arg_names, arg_opts)]
+
+    return final_args
+
+# default options
+ref_dir = None
+output_formats = ['docx', 'pdf']
+pandoc_args = []
+
 # 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 current_dir = os.getcwd()
 
+args = sys.argv[1:]
+
 # find out if user specified work dir
-if len(sys.argv) > 1:
-    work_dir = sys.argv[-1]
+if len(args) > 0:
+    work_dir = args[-1]
+    args = args[:-1]
 elif 'last_directory.txt' in os.listdir(scriptdir):
     work_dir =\
         open(os.path.join(scriptdir, 'last_directory.txt'), 'r').read().strip()
@@ -45,10 +75,23 @@ else:
           'look for markdown files'
     work_dir = raw_input()
 
-if '-bibtex' in sys.argv:
-    print 'user-specified bibtex directory'
-    ref_dir = sys.argv[-2]
-else:
+# find args
+final_args = parse_arguments(args)
+for arg, arg_opts in final_args:
+    if arg == '-bibtex':
+        # user-specified bibtex dir:
+        print 'user-specified bibtex directory'
+        ref_dir = arg_opts[0]
+    if arg == '-o':
+        # user specified output formats
+        output_formats = arg_opts
+    else:
+        # pass args on to pandoc
+        pandoc_arg = arg
+        pandoc_arg += ' '.join(arg_opts)
+        pandoc_args.append(pandoc_arg)
+
+if ref_dir is None:
     if 'darwin' in sys.platform:
         default_bibtex_folder = 'default_bibtex_folder_mac.txt'
     else:
@@ -61,7 +104,6 @@ else:
         fin = open(default_bibtex_folder, 'r')
         ref_dir = fin.readlines()[0].rstrip()
         fin.close()
-
     else:
         ref_dir = os.path.join(work_dir, 'refs')
         if os.path.exists(ref_dir) is False:
@@ -106,12 +148,6 @@ if len(csl_files) == 0:
 csl_files.sort()
 csl_file = csl_files[0]
 
-# user specified output formats
-if '-o' in sys.argv:
-    output_formats = sys.argv[sys.argv.index('-o')+1:]
-# default = pdf, docx and odt output
-else:
-    output_formats = ['pdf', 'docx']
 
 for markdown_file in markdown_files:
     
@@ -120,7 +156,7 @@ for markdown_file in markdown_files:
     bib_files = [fn for fn in fns_ref if 'for_%s.bib' % md_short in fn]
 
     # go through all bibtex files
-    # there should be only one, but in just in case
+    # there should be only one, but just in case
     for bib_file in bib_files:
 
         bib_file_with_path = os.path.join(work_dir, bib_file)
@@ -132,13 +168,13 @@ for markdown_file in markdown_files:
             #md_file_loc = os.path.join(work_dir, markdown_file)
             csl_fn = os.path.join(csl_folder, csl_file)
 
-
             pdc = ['pandoc', markdown_file, '-o',  output_file,
                    '-V', 'geometry:margin=1in',
                    '--bibliography=%s' % bib_file_with_path,
                    '--csl=%s' % csl_fn]
-            if '-xe' in sys.argv:
-                pdc.append("--latex-engine=xelatex")
+
+            if pandoc_args is not None:
+                pdc.append(pandoc_args[0].strip('"'))
 
             print '\n\ncalling pandoc:\n'
             print '-> ', ' '.join(pdc)
