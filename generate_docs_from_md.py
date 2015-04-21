@@ -173,7 +173,7 @@ for markdown_file in markdown_files:
                    '--bibliography=%s' % bib_file_with_path,
                    '--csl=%s' % csl_fn]
 
-            if pandoc_args is not None:
+            if pandoc_args != []:
                 pdc.append(pandoc_args[0].strip('"'))
 
             print '\n\ncalling pandoc:\n'
