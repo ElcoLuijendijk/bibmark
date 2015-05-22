@@ -76,20 +76,22 @@ else:
     work_dir = raw_input()
 
 # find args
-final_args = parse_arguments(args)
-for arg, arg_opts in final_args:
-    if arg == '-bibtex':
-        # user-specified bibtex dir:
-        print 'user-specified bibtex directory'
-        ref_dir = arg_opts[0]
-    if arg == '-o':
-        # user specified output formats
-        output_formats = arg_opts
-    else:
-        # pass args on to pandoc
-        pandoc_arg = arg
-        pandoc_arg += ' '.join(arg_opts)
-        pandoc_args.append(pandoc_arg)
+if len(args) > 0:
+    final_args = parse_arguments(args)
+
+    for arg, arg_opts in final_args:
+        if arg == '-bibtex':
+            # user-specified bibtex dir:
+            print 'user-specified bibtex directory'
+            ref_dir = arg_opts[0]
+        if arg == '-o':
+            # user specified output formats
+            output_formats = arg_opts
+        else:
+            # pass args on to pandoc
+            pandoc_arg = arg
+            pandoc_arg += ' '.join(arg_opts)
+            pandoc_args.append(pandoc_arg)
 
 if ref_dir is None:
     if 'darwin' in sys.platform:
