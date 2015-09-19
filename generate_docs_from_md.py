@@ -49,7 +49,10 @@ def parse_arguments(args):
 # default options
 ref_dir = None
 output_formats = ['docx', 'pdf']
-pandoc_args = []
+pandoc_args = ['-V', 'geometry:margin=0.5in',
+               '--filter=pandoc-crossref']
+               #,'--latex-engine=xelatex']
+#pandoc_args = ['-V', 'geometry:margin=0.5in', ]
 
 # 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
@@ -76,8 +79,9 @@ else:
     work_dir = raw_input()
 
 # find args
-if args != []:
+if len(args) > 0:
     final_args = parse_arguments(args)
+
     for arg, arg_opts in final_args:
         if arg == '-bibtex':
             # user-specified bibtex dir:
@@ -169,13 +173,16 @@ for markdown_file in markdown_files:
             #md_file_loc = os.path.join(work_dir, markdown_file)
             csl_fn = os.path.join(csl_folder, csl_file)
 
-            pdc = ['pandoc', markdown_file, '-o',  output_file,
-                   '-V', 'geometry:margin=1in',
-                   '--bibliography=%s' % bib_file_with_path,
-                   '--csl=%s' % csl_fn]
+            pdc = ['pandoc', markdown_file, '-o',  output_file]
+            #pdc = ['/home/elco/.cabal/bin/pandoc', markdown_file,
+            #       '-o',  output_file]
 
             if pandoc_args != []:
-                pdc.append(pandoc_args[0].strip('"'))
+                #pdc.append(pandoc_args[0].strip('"'))
+                pdc += pandoc_args
+
+            pdc += ['--bibliography=%s' % bib_file_with_path,
+                    '--csl=%s' % csl_fn]
 
             print '\n\ncalling pandoc:\n'
             print '-> ', ' '.join(pdc)
